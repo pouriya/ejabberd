@@ -1,4 +1,4 @@
-name: Runtime
+name: Release
 
 on:
   push:
@@ -26,13 +26,12 @@ on:
 
 jobs:
 
-  rebar:
-    name: Rebar
+  build:
+    name: Build
     strategy:
       fail-fast: false
       matrix:
         otp: ['26', '27']
-        rebar: ['rebar3']
     runs-on: ubuntu-22.04
     container:
       image: erlang:${{ matrix.otp }}
@@ -58,7 +57,7 @@ jobs:
     - name: Compile
       run: |
         ./autogen.sh
-        ./configure --with-rebar=./${{ matrix.rebar }} \
+        ./configure --with-rebar=./rebar3 \
                     --prefix=/tmp/ejabberd \
                     --enable-all \
                     --disable-elixir \
@@ -66,9 +65,10 @@ jobs:
                     --disable-odbc
         make
 
-    - run: make xref
+    - name: xref
+      run: make xref
 
-    - name: Run rel
+    - name: Release
       run: |
         make rel
         _build/prod/rel/ejabberd/bin/ejabberdctl start \
@@ -77,7 +77,7 @@ jobs:
         _build/prod/rel/ejabberd/bin/ejabberdctl registered_users localhost > registered.log
         _build/prod/rel/ejabberd/bin/ejabberdctl stop \
           && _build/prod/rel/ejabberd/bin/ejabberdctl stopped
-        mv _build/prod/rel/ejabberd/*.tar.gz _build/prod/rel/yo.${{matrix.otp}}.tar.gz
+        mv _build/prod/rel/ejabberd/*.tar.gz _build/prod/rel/ejabberd/yo.${{matrix.otp}}.tar.gz
     
     - name: Archive release artifacts
       uses: actions/upload-artifact@v4
