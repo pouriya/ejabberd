@@ -84,6 +84,13 @@ jobs:
         _build/prod/rel/ejabberd/bin/ejabberdctl registered_users localhost > registered.log
         _build/prod/rel/ejabberd/bin/ejabberdctl stop \
           && _build/prod/rel/ejabberd/bin/ejabberdctl stopped
+    
+    - name: Archive release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release
+        path: |
+          _build/prod/rel/ejabberd/*.tar.gz
 
     - name: Run dev
       run: |
